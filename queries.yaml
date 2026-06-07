@@ -1,0 +1,68 @@
+query_groups:
+  accolades:
+    - '"Merrill Edge" award'
+    - '"Merrill Edge" accolade'
+    - '"Merrill Edge" ranked'
+    - '"Merrill Edge" "best online broker"'
+    - '"Merrill Edge" "best brokerage"'
+
+  rankings_reviews:
+    - '"Merrill Edge" review'
+    - '"Merrill Edge" ranking'
+    - '"Merrill Edge Self-Directed" review'
+    - '"Merrill Edge" "best for"'
+
+  competitor_comparisons:
+    - '"Merrill Edge" vs Fidelity'
+    - '"Merrill Edge" vs Schwab'
+    - '"Merrill Edge" vs Vanguard'
+    - '"Merrill Edge" vs E*TRADE'
+    - '"Merrill Edge" Robinhood'
+
+  product_features:
+    - '"Merrill Edge" options trading'
+    - '"Merrill Edge" research tools'
+    - '"Merrill Edge" fractional shares'
+    - '"Merrill Edge" preferred rewards'
+
+  cash_yield:
+    - '"Merrill Edge" money market'
+    - '"Merrill Edge" cash sweep'
+    - '"Merrill Edge" cash yield'
+    - '"Merrill Edge" settlement fund'
+
+  transfers_acat:
+    - '"Merrill Edge" ACAT'
+    - '"Merrill Edge" account transfer'
+    - '"Merrill Edge" transfer out'
+    - '"Merrill Edge" transfer delay'
+
+  fees_pricing:
+    - '"Merrill Edge" fees'
+    - '"Merrill Edge" pricing'
+    - '"Merrill Edge" margin rates'
+    - '"Merrill Edge" commission'
+
+  app_website:
+    - '"Merrill Edge" app'
+    - '"Merrill Edge" website'
+    - '"Merrill Edge" login'
+    - '"Merrill Edge" mobile'
+
+  customer_service:
+    - '"Merrill Edge" customer service'
+    - '"Merrill Edge" support'
+    - '"Merrill Edge" call center'
+    - '"Merrill Edge" complaint'
+
+  forum_themes:
+    - '"Merrill Edge" "Merrill Lynch"'
+    - '"Merrill Edge" brokerage'
+    - '"Merrill Edge" IRA'
+    - '"Merrill Edge" taxable account'
+
+  reddit_forum_themes:
+    - '"Merrill Edge"'
+    - '"Merrill Edge" brokerage'
+    - '"Merrill Edge" money market'
+    - '"Merrill Edge" transfer'

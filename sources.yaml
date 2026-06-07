@@ -1,0 +1,66 @@
+sources:
+  - name: google_web
+    type: google_cse
+    enabled: true
+    query_groups:
+      - accolades
+      - rankings_reviews
+      - competitor_comparisons
+      - product_features
+      - cash_yield
+      - transfers_acat
+      - fees_pricing
+      - app_website
+      - customer_service
+    result_limit: 10
+    date_restrict: d7
+    safe: active
+
+  - name: google_forums_bogleheads
+    type: google_cse
+    enabled: true
+    query_groups:
+      - forum_themes
+      - cash_yield
+      - transfers_acat
+      - fees_pricing
+    site_restrict: bogleheads.org
+    result_limit: 10
+    date_restrict: d14
+    safe: active
+    is_forum_discussion: true
+
+  - name: google_forums_brokerage_review
+    type: google_cse
+    enabled: true
+    query_groups:
+      - forum_themes
+      - app_website
+      - customer_service
+    site_restrict: brokerage-review.com
+    result_limit: 10
+    date_restrict: d14
+    safe: active
+    is_forum_discussion: true
+
+  - name: reddit_all
+    type: reddit
+    enabled: true
+    query_groups:
+      - reddit_forum_themes
+      - competitor_comparisons
+      - cash_yield
+      - transfers_acat
+      - fees_pricing
+      - app_website
+      - customer_service
+    subreddits:
+      - investing
+      - personalfinance
+      - Bogleheads
+      - dividends
+      - MerrillEdge
+    result_limit: 20
+    sort: new
+    time_filter: day
+    is_forum_discussion: true

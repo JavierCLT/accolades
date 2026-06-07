@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merrill-edge-monitor"
+version = "0.1.0"
+description = "Daily monitoring agent for Merrill Edge mentions, accolades, and forum themes."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "google-api-python-client>=2.130.0",
+    "google-auth>=2.29.0",
+    "praw>=7.7.1",
+    "python-dotenv>=1.0.1",
+    "PyYAML>=6.0.1",
+    "requests>=2.32.0",
+]
+
+[project.optional-dependencies]
+llm = ["openai>=1.35.0"]
+dev = ["pytest>=8.2.0"]
+
+[project.scripts]
+merrill-monitor = "merrill_monitor.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
