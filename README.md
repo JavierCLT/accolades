@@ -28,7 +28,7 @@ merrill-monitor init-db
 merrill-monitor run --dry-run
 ```
 
-Remove `--dry-run` after email configuration is working.
+`--dry-run` previews the digest without writing SQLite or sending email. Use `--baseline` once when you want to store current results as already seen before normal daily emails begin.
 
 ## Required API Setup
 
@@ -133,7 +133,7 @@ The implementation also stores `summary`, `last_notified_date`, and `raw_json` f
 
 ## GitHub Actions
 
-The workflow in `.github/workflows/daily-monitor.yml` runs daily at `12:15 UTC` and can also be started manually.
+The workflow in `.github/workflows/daily-monitor.yml` runs daily at `12:15 UTC` and can also be started manually. Manual runs include a `baseline` option that stores current results as seen without sending an email.
 
 Add these repository secrets as needed:
 
@@ -166,6 +166,9 @@ merrill-monitor init-db
 
 # Run without sending email
 merrill-monitor run --dry-run
+
+# First-time baseline: store current results as seen without emailing them
+merrill-monitor run --baseline
 
 # Run with explicit config paths
 merrill-monitor run --sources sources.yaml --queries queries.yaml --db data/monitor.sqlite

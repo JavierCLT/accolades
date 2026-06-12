@@ -26,7 +26,9 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--sources", default="sources.yaml", help="Path to sources.yaml")
     run_parser.add_argument("--queries", default="queries.yaml", help="Path to queries.yaml")
     run_parser.add_argument("--db", default=None, help="Override SQLite database path")
-    run_parser.add_argument("--dry-run", action="store_true", help="Print digest instead of sending email")
+    mode_group = run_parser.add_mutually_exclusive_group()
+    mode_group.add_argument("--dry-run", action="store_true", help="Print digest without sending email or writing SQLite")
+    mode_group.add_argument("--baseline", action="store_true", help="Store current results as seen without sending email")
     run_parser.add_argument("--send-empty", action="store_true", help="Send a digest even when there are no new items")
 
     subparsers.add_parser("init-db", help="Create or migrate the SQLite database.")
@@ -70,15 +72,32 @@ def run_monitor(args: argparse.Namespace, runtime) -> int:
     LOGGER.info("Collected %d candidates, %d after in-batch dedupe", len(candidates), len(deduped_candidates))
 
     new_items: list[ClassifiedItem] = []
+    seen_count = 0
+    dry_run = getattr(args, "dry_run", False)
+    baseline = getattr(args, "baseline", False)
     for candidate in deduped_candidates:
         if store.get_by_normalized_url(candidate.normalized_url):
-            store.touch_seen(candidate, run_date)
+            seen_count += 1
+            if not dry_run:
+                store.touch_seen(candidate, run_date)
             continue
         item = classifier.classify(candidate)
-        if store.insert_new(item, run_date):
+        if dry_run:
+            new_items.append(item)
+        elif store.insert_new(item, run_date):
             new_items.append(item)
 
     new_items = sorted(new_items, key=lambda item: item.relevance_score, reverse=True)
+    if baseline:
+        store.mark_notified([item.id for item in new_items], run_date)
+        LOGGER.info(
+            "Baseline complete; stored %d new items, touched %d existing items, email not sent",
+            len(new_items),
+            seen_count,
+        )
+        print(f"Baseline complete: stored {len(new_items)} new items and touched {seen_count} existing items.")
+        return 0
+
     if runtime.max_items_per_digest > 0:
         new_items = new_items[: runtime.max_items_per_digest]
 
@@ -88,7 +107,7 @@ def run_monitor(args: argparse.Namespace, runtime) -> int:
         print(subject)
         print()
         print(body)
-        LOGGER.info("Dry run complete; email not sent")
+        LOGGER.info("Dry run complete; database unchanged and email not sent")
         return 0
 
     if not should_send:
