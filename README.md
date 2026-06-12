@@ -156,7 +156,7 @@ OPENAI_MODEL
 
 The workflow sets `OPENAI_REASONING_EFFORT=low` directly.
 
-The workflow persists `data/monitor.sqlite` through `actions/cache` using a daily cache key with restore keys, so deduplication state carries forward between scheduled runs.
+The workflow persists `data/monitor.sqlite` through `actions/cache` using a unique run key with restore keys, so deduplication state carries forward between manual baseline runs and scheduled runs.
 
 ## Local Commands
 
