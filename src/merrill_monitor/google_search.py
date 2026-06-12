@@ -14,6 +14,10 @@ LOGGER = logging.getLogger(__name__)
 GOOGLE_CSE_ENDPOINT = "https://customsearch.googleapis.com/customsearch/v1"
 
 
+class GoogleSearchConfigurationError(RuntimeError):
+    """Raised when Google rejects credentials, API access, or engine configuration."""
+
+
 class GoogleCustomSearchClient:
     def __init__(
         self,
@@ -71,8 +75,14 @@ class GoogleCustomSearchClient:
                     params=params,
                     timeout=self.timeout_seconds,
                 )
+                if response.status_code in {401, 403}:
+                    raise GoogleSearchConfigurationError(
+                        format_google_error(response, effective_query)
+                    )
                 response.raise_for_status()
                 payload = response.json()
+            except GoogleSearchConfigurationError:
+                raise
             except requests.RequestException:
                 LOGGER.exception("Google Custom Search request failed for query=%r", effective_query)
                 break
@@ -129,6 +139,29 @@ class GoogleCustomSearchClient:
                 "is_forum_discussion": is_forum_discussion,
             },
         )
+
+
+def format_google_error(response: requests.Response, query: str) -> str:
+    reason = ""
+    message = response.text.strip()
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = {}
+
+    if isinstance(payload, dict):
+        error = payload.get("error", {})
+        if isinstance(error, dict):
+            message = str(error.get("message") or message)
+            errors = error.get("errors") or []
+            if errors and isinstance(errors[0], dict):
+                reason = str(errors[0].get("reason") or "")
+
+    detail = f"Google Custom Search API returned {response.status_code}"
+    if reason:
+        detail += f" ({reason})"
+    detail += f" for query={query!r}: {message}"
+    return detail
 
 
 def extract_published_date(item: dict[str, Any]) -> str | None:
