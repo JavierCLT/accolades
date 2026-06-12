@@ -33,7 +33,7 @@ def build_email_digest(items: list[ClassifiedItem], run_date: str) -> tuple[str,
     add_item_section(lines, [item for item in ordered if item.is_accolade])
     lines.append("")
 
-    lines.append("3. Forum / Reddit themes")
+    lines.append("3. Forum themes")
     forum_items = [item for item in ordered if item.is_forum_discussion]
     if forum_items:
         forum_counts = Counter(item.category for item in forum_items)

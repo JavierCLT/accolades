@@ -181,7 +181,7 @@ class ItemClassifier:
             category = "Customer complaint"
 
         sentiment = infer_sentiment(text)
-        is_forum_discussion = bool(candidate.metadata.get("is_forum_discussion")) or candidate.metadata.get("source_kind") == "reddit"
+        is_forum_discussion = bool(candidate.metadata.get("is_forum_discussion"))
         is_accolade = category == "New accolade / award"
         relevance_score = score_relevance(
             text=text,

@@ -60,9 +60,3 @@ query_groups:
     - '"Merrill Edge" brokerage'
     - '"Merrill Edge" IRA'
     - '"Merrill Edge" taxable account'
-
-  reddit_forum_themes:
-    - '"Merrill Edge"'
-    - '"Merrill Edge" brokerage'
-    - '"Merrill Edge" money market'
-    - '"Merrill Edge" transfer'

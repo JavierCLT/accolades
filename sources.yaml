@@ -42,25 +42,3 @@ sources:
     date_restrict: d14
     safe: active
     is_forum_discussion: true
-
-  - name: reddit_all
-    type: reddit
-    enabled: true
-    query_groups:
-      - reddit_forum_themes
-      - competitor_comparisons
-      - cash_yield
-      - transfers_acat
-      - fees_pricing
-      - app_website
-      - customer_service
-    subreddits:
-      - investing
-      - personalfinance
-      - Bogleheads
-      - dividends
-      - MerrillEdge
-    result_limit: 20
-    sort: new
-    time_filter: day
-    is_forum_discussion: true

@@ -1,10 +1,10 @@
 # Merrill Edge Daily Monitor
 
-Python 3.11+ monitoring agent for new Merrill Edge mentions, accolades, rankings, reviews, Reddit discussions, and forum themes. It uses Google Custom Search JSON API for web results, Reddit's official API via PRAW for Reddit, SQLite for deduplication, and SMTP or Gmail API for email delivery.
+Python 3.11+ monitoring agent for new Merrill Edge mentions, accolades, rankings, reviews, and forum themes. It uses Google Custom Search JSON API for web and forum results, SQLite for deduplication, and SMTP or Gmail API for email delivery.
 
 ## What It Does
 
-- Searches configurable web, forum, and Reddit sources daily.
+- Searches configurable web and forum sources daily.
 - Deduplicates results by normalized URL against `seen_results` in SQLite.
 - Classifies new items into accolade, competitor, complaint, feature, cash yield, ACAT, fees, app/website, service, or other categories.
 - Uses optional LLM classification when configured, with a rule-based fallback.
@@ -42,18 +42,6 @@ GOOGLE_CSE_ID=...
 ```
 
 The monitor calls the JSON API endpoint only. It does not scrape result pages.
-
-### Reddit API
-
-Create a Reddit app and use PRAW credentials:
-
-```text
-REDDIT_CLIENT_ID=...
-REDDIT_CLIENT_SECRET=...
-REDDIT_USER_AGENT=merrill-edge-monitor/0.1 by your-reddit-username
-```
-
-The monitor searches Reddit through the official API client.
 
 ## Email Setup
 
@@ -110,7 +98,6 @@ If the LLM call fails, the monitor logs the error and uses rule-based classifica
 `sources.yaml` stores source definitions. Supported source types:
 
 - `google_cse`: Google Custom Search JSON API.
-- `reddit`: Reddit API via PRAW.
 
 Useful source fields:
 
@@ -119,7 +106,6 @@ Useful source fields:
 - `result_limit`: maximum results per query.
 - `date_restrict`: Google CSE date filter such as `d7` or `d14`.
 - `site_restrict`: adds `site:example.com` to Google queries.
-- `subreddits`, `sort`, `time_filter`: Reddit search controls.
 - `is_forum_discussion`: marks results as forum/theme items in classification and digest sections.
 
 ## SQLite Schema
@@ -153,9 +139,6 @@ Add these repository secrets as needed:
 ```text
 GOOGLE_CSE_API_KEY
 GOOGLE_CSE_ID
-REDDIT_CLIENT_ID
-REDDIT_CLIENT_SECRET
-REDDIT_USER_AGENT
 EMAIL_BACKEND
 EMAIL_FROM
 EMAIL_TO

@@ -11,7 +11,6 @@ from .emailer import send_email
 from .google_search import GoogleCustomSearchClient
 from .logging_config import configure_logging
 from .models import CandidateItem, ClassifiedItem
-from .reddit_client import RedditSearchClient
 from .storage import SeenStore
 from .utils import coerce_bool, today_iso
 
@@ -112,7 +111,6 @@ def collect_candidates(
     queries_config: dict,
 ) -> list[CandidateItem]:
     google_client = GoogleCustomSearchClient()
-    reddit_client = RedditSearchClient()
     candidates: list[CandidateItem] = []
 
     for source in sources:
@@ -136,24 +134,6 @@ def collect_candidates(
                         safe=source.get("safe", "active"),
                         site_restrict=source.get("site_restrict"),
                         is_forum_discussion=coerce_bool(source.get("is_forum_discussion"), default=False),
-                    )
-                )
-        elif source_type == "reddit":
-            if not reddit_client.is_configured:
-                LOGGER.warning("Reddit API is not configured; skipping source=%s", source_name)
-                continue
-            subreddits = source.get("subreddits") or ["all"]
-            for query_group, query in query_pairs:
-                candidates.extend(
-                    reddit_client.search(
-                        source_name=source_name,
-                        query_group=query_group,
-                        query=query,
-                        subreddits=[str(name) for name in subreddits],
-                        result_limit=int(source.get("result_limit", 20)),
-                        sort=str(source.get("sort", "new")),
-                        time_filter=str(source.get("time_filter", "day")),
-                        is_forum_discussion=coerce_bool(source.get("is_forum_discussion"), default=True),
                     )
                 )
         else:
