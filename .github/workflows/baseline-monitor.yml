@@ -1,0 +1,49 @@
+name: Merrill Edge Baseline Monitor
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set cache date
+        id: cache-date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore SQLite state
+        uses: actions/cache@v4
+        with:
+          path: data/monitor.sqlite
+          key: ${{ runner.os }}-merrill-monitor-sqlite-${{ steps.cache-date.outputs.date }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-merrill-monitor-sqlite-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[llm]
+
+      - name: Run baseline
+        env:
+          DB_PATH: data/monitor.sqlite
+          LOG_LEVEL: INFO
+          LOCAL_TIMEZONE: America/New_York
+          GOOGLE_CSE_API_KEY: ${{ secrets.GOOGLE_CSE_API_KEY }}
+          GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
+          LLM_CLASSIFIER_ENABLED: ${{ secrets.LLM_CLASSIFIER_ENABLED }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_REASONING_EFFORT: low
+        run: merrill-monitor run --sources sources.yaml --queries queries.yaml --baseline

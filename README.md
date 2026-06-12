@@ -133,7 +133,7 @@ The implementation also stores `summary`, `last_notified_date`, and `raw_json` f
 
 ## GitHub Actions
 
-The workflow in `.github/workflows/daily-monitor.yml` runs daily at `12:15 UTC` and can also be started manually. Manual runs include a `baseline` option that stores current results as seen without sending an email.
+The workflow in `.github/workflows/daily-monitor.yml` runs daily at `12:15 UTC` and can also be started manually. The separate `.github/workflows/baseline-monitor.yml` workflow stores current results as seen without sending an email.
 
 Add these repository secrets as needed:
 
