@@ -86,7 +86,8 @@ Then set:
 ```text
 LLM_CLASSIFIER_ENABLED=true
 OPENAI_API_KEY=...
-OPENAI_MODEL=...
+OPENAI_MODEL=gpt-5.5
+OPENAI_REASONING_EFFORT=low
 ```
 
 If the LLM call fails, the monitor logs the error and uses rule-based classification.
@@ -152,6 +153,8 @@ LLM_CLASSIFIER_ENABLED
 OPENAI_API_KEY
 OPENAI_MODEL
 ```
+
+The workflow sets `OPENAI_REASONING_EFFORT=low` directly.
 
 The workflow persists `data/monitor.sqlite` through `actions/cache` using a daily cache key with restore keys, so deduplication state carries forward between scheduled runs.
 

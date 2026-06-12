@@ -38,9 +38,15 @@ class ItemClassifier:
         *,
         use_llm: bool = False,
         openai_model: str | None = None,
+        openai_reasoning_effort: str | None = None,
     ) -> None:
         self.use_llm = use_llm
         self.openai_model = openai_model or os.getenv("OPENAI_MODEL")
+        self.openai_reasoning_effort = (
+            openai_reasoning_effort
+            or os.getenv("OPENAI_REASONING_EFFORT")
+            or "low"
+        ).strip().lower()
 
     def classify(self, candidate: CandidateItem) -> ClassifiedItem:
         classification: Classification | None = None
@@ -94,11 +100,11 @@ class ItemClassifier:
             "allowed_sentiments": sorted(ALLOWED_SENTIMENTS),
             "allowed_actions": sorted(ALLOWED_ACTIONS),
         }
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model=self.openai_model,
-            temperature=0.1,
-            response_format={"type": "json_object"},
-            messages=[
+            reasoning={"effort": self.openai_reasoning_effort},
+            text={"format": {"type": "json_object"}},
+            input=[
                 {
                     "role": "system",
                     "content": (
@@ -112,7 +118,7 @@ class ItemClassifier:
                 {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
             ],
         )
-        content = response.choices[0].message.content or "{}"
+        content = extract_response_text(response)
         payload = json.loads(content)
         return self._sanitize_classification(payload, candidate)
 
@@ -251,6 +257,21 @@ class ItemClassifier:
 
 def contains_any(text: str, terms: list[str]) -> bool:
     return any(term in text for term in terms)
+
+
+def extract_response_text(response: Any) -> str:
+    output_text = getattr(response, "output_text", None)
+    if output_text:
+        return str(output_text)
+    output = getattr(response, "output", None) or []
+    text_parts: list[str] = []
+    for item in output:
+        content = getattr(item, "content", None) or []
+        for content_item in content:
+            text = getattr(content_item, "text", None)
+            if text:
+                text_parts.append(str(text))
+    return "\n".join(text_parts) or "{}"
 
 
 def infer_sentiment(text: str) -> str:

@@ -22,6 +22,7 @@ class RuntimeConfig:
     local_timezone: str
     llm_classifier_enabled: bool
     openai_model: str | None
+    openai_reasoning_effort: str
 
 
 def load_runtime_config(db_path: str | None = None) -> RuntimeConfig:
@@ -41,6 +42,7 @@ def load_runtime_config(db_path: str | None = None) -> RuntimeConfig:
         local_timezone=os.getenv("LOCAL_TIMEZONE", "America/New_York"),
         llm_classifier_enabled=coerce_bool(os.getenv("LLM_CLASSIFIER_ENABLED"), default=False),
         openai_model=os.getenv("OPENAI_MODEL") or None,
+        openai_reasoning_effort=os.getenv("OPENAI_REASONING_EFFORT", "low").strip().lower() or "low",
     )
 
 

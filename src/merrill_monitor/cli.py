@@ -61,6 +61,7 @@ def run_monitor(args: argparse.Namespace, runtime) -> int:
     classifier = ItemClassifier(
         use_llm=runtime.llm_classifier_enabled,
         openai_model=runtime.openai_model,
+        openai_reasoning_effort=runtime.openai_reasoning_effort,
     )
 
     LOGGER.info("Starting Merrill Edge monitor for %s with %d enabled sources", run_date, len(sources))
