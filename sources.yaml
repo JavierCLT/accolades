@@ -1,6 +1,6 @@
 sources:
-  - name: google_web
-    type: google_cse
+  - name: brave_web
+    type: brave_search
     enabled: true
     query_groups:
       - accolades
@@ -13,11 +13,13 @@ sources:
       - app_website
       - customer_service
     result_limit: 10
-    date_restrict: d7
-    safe: active
+    freshness: pw
+    safesearch: moderate
+    country: US
+    search_lang: en
 
-  - name: google_forums_bogleheads
-    type: google_cse
+  - name: brave_forums_bogleheads
+    type: brave_search
     enabled: true
     query_groups:
       - forum_themes
@@ -26,12 +28,14 @@ sources:
       - fees_pricing
     site_restrict: bogleheads.org
     result_limit: 10
-    date_restrict: d14
-    safe: active
+    freshness: pm
+    safesearch: moderate
+    country: US
+    search_lang: en
     is_forum_discussion: true
 
-  - name: google_forums_brokerage_review
-    type: google_cse
+  - name: brave_forums_brokerage_review
+    type: brave_search
     enabled: true
     query_groups:
       - forum_themes
@@ -39,6 +43,8 @@ sources:
       - customer_service
     site_restrict: brokerage-review.com
     result_limit: 10
-    date_restrict: d14
-    safe: active
+    freshness: pm
+    safesearch: moderate
+    country: US
+    search_lang: en
     is_forum_discussion: true

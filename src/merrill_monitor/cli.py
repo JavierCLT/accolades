@@ -8,7 +8,7 @@ from .classifier import ItemClassifier
 from .config import enabled_sources, iter_source_queries, load_runtime_config, load_yaml_file
 from .digest import build_email_digest
 from .emailer import send_email
-from .google_search import GoogleCustomSearchClient
+from .brave_search import BraveSearchClient
 from .logging_config import configure_logging
 from .models import CandidateItem, ClassifiedItem
 from .storage import SeenStore
@@ -130,7 +130,7 @@ def collect_candidates(
     sources: list[dict],
     queries_config: dict,
 ) -> list[CandidateItem]:
-    google_client = GoogleCustomSearchClient()
+    brave_client = BraveSearchClient()
     candidates: list[CandidateItem] = []
 
     for source in sources:
@@ -139,19 +139,21 @@ def collect_candidates(
         query_pairs = iter_source_queries(source, queries_config)
         LOGGER.info("Running source=%s type=%s with %d queries", source_name, source_type, len(query_pairs))
 
-        if source_type == "google_cse":
-            if not google_client.is_configured:
-                LOGGER.warning("Google Custom Search is not configured; skipping source=%s", source_name)
+        if source_type == "brave_search":
+            if not brave_client.is_configured:
+                LOGGER.warning("Brave Search is not configured; skipping source=%s", source_name)
                 continue
             for query_group, query in query_pairs:
                 candidates.extend(
-                    google_client.search(
+                    brave_client.search(
                         source_name=source_name,
                         query_group=query_group,
                         query=query,
                         result_limit=int(source.get("result_limit", 10)),
-                        date_restrict=source.get("date_restrict"),
-                        safe=source.get("safe", "active"),
+                        freshness=source.get("freshness"),
+                        safesearch=source.get("safesearch", "moderate"),
+                        country=source.get("country", "US"),
+                        search_lang=source.get("search_lang", "en"),
                         site_restrict=source.get("site_restrict"),
                         is_forum_discussion=coerce_bool(source.get("is_forum_discussion"), default=False),
                     )

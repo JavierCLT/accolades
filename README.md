@@ -1,6 +1,6 @@
 # Merrill Edge Daily Monitor
 
-Python 3.11+ monitoring agent for new Merrill Edge mentions, accolades, rankings, reviews, and forum themes. It uses Google Custom Search JSON API for web and forum results, SQLite for deduplication, and SMTP or Gmail API for email delivery.
+Python 3.11+ monitoring agent for new Merrill Edge mentions, accolades, rankings, reviews, and forum themes. It uses Brave Search API for web and forum results, SQLite for deduplication, and SMTP or Gmail API for email delivery.
 
 ## What It Does
 
@@ -32,16 +32,15 @@ merrill-monitor run --dry-run
 
 ## Required API Setup
 
-### Google Custom Search JSON API
+### Brave Search API
 
-Create a Google API key with Custom Search JSON API access and a Programmable Search Engine ID. Set:
+Create a Brave Search API key from the Brave Search API dashboard. Set:
 
 ```text
-GOOGLE_CSE_API_KEY=...
-GOOGLE_CSE_ID=...
+BRAVE_SEARCH_API_KEY=...
 ```
 
-The monitor calls the JSON API endpoint only. It does not scrape result pages.
+The monitor calls Brave's Web Search API endpoint only. It does not scrape result pages.
 
 ## Email Setup
 
@@ -96,17 +95,18 @@ If the LLM call fails, the monitor logs the error and uses rule-based classifica
 
 `queries.yaml` stores query groups. Add, remove, or edit searches there without changing Python code.
 
-`sources.yaml` stores source definitions. Supported source types:
+`sources.yaml` stores source definitions. Supported source type:
 
-- `google_cse`: Google Custom Search JSON API.
+- `brave_search`: Brave Search API.
 
 Useful source fields:
 
 - `enabled`: turn a source on or off.
 - `query_groups`: list of query groups from `queries.yaml`.
 - `result_limit`: maximum results per query.
-- `date_restrict`: Google CSE date filter such as `d7` or `d14`.
-- `site_restrict`: adds `site:example.com` to Google queries.
+- `freshness`: Brave freshness filter such as `pd`, `pw`, `pm`, `py`, or a date range.
+- `site_restrict`: adds `site:example.com` to Brave queries.
+- `country`, `search_lang`, `safesearch`: Brave search controls.
 - `is_forum_discussion`: marks results as forum/theme items in classification and digest sections.
 
 ## SQLite Schema
@@ -138,8 +138,7 @@ The workflow in `.github/workflows/daily-monitor.yml` runs daily at `12:15 UTC` 
 Add these repository secrets as needed:
 
 ```text
-GOOGLE_CSE_API_KEY
-GOOGLE_CSE_ID
+BRAVE_SEARCH_API_KEY
 EMAIL_BACKEND
 EMAIL_FROM
 EMAIL_TO
@@ -176,7 +175,7 @@ merrill-monitor run --sources sources.yaml --queries queries.yaml --db data/moni
 
 ## Compliance Notes
 
-This project intentionally uses APIs and configurable source definitions. Do not add sources that require scraping in violation of site terms. Prefer official APIs, RSS feeds, or pages made available through Google Custom Search.
+This project intentionally uses APIs and configurable source definitions. Do not add sources that require scraping in violation of site terms. Prefer official APIs, RSS feeds, or pages made available through Brave Search API.
 
 ## Development Checks
 
