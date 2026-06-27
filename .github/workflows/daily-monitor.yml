@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "15 12 * * *"
   workflow_dispatch:
-    inputs:
-      baseline:
-        description: "Store current results as seen without sending email"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -64,10 +58,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           OPENAI_REASONING_EFFORT: low
-          BASELINE_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.baseline == true }}
-        run: |
-          if [ "$BASELINE_RUN" = "true" ]; then
-            merrill-monitor run --sources sources.yaml --queries queries.yaml --baseline
-          else
-            merrill-monitor run --sources sources.yaml --queries queries.yaml
-          fi
+        run: merrill-monitor run --sources sources.yaml --queries queries.yaml
