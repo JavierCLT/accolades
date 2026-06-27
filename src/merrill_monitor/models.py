@@ -8,6 +8,12 @@ ALLOWED_CATEGORIES = [
     "New accolade / award",
     "Competitor comparison",
     "Customer complaint",
+    "Competitor offer / promotion",
+    "Competitor pricing / fees",
+    "Cash yield / rate change",
+    "Mobile app review",
+    "Regulatory / complaint signal",
+    "Competitive product gap",
     "Product feature discussion",
     "Money market / cash yield discussion",
     "Account transfer / ACAT discussion",
@@ -26,6 +32,10 @@ ALLOWED_ACTIONS = {
     "consider using in marketing copy",
     "escalate to product",
     "escalate to service",
+    "escalate to compliance",
+    "escalate app issue",
+    "review competitor offer",
+    "review cash yield positioning",
     "competitive threat",
 }
 

@@ -7,7 +7,7 @@ from typing import Any
 import requests
 
 from .models import CandidateItem
-from .utils import first_nonempty, normalize_url, trim_text
+from .utils import first_nonempty, normalize_url, normalize_url_with_content_signature, trim_text
 
 
 LOGGER = logging.getLogger(__name__)
@@ -45,6 +45,7 @@ class BraveSearchClient:
         search_lang: str | None = "en",
         site_restrict: str | None = None,
         is_forum_discussion: bool = False,
+        dedupe_strategy: str = "url",
     ) -> list[CandidateItem]:
         if not self.is_configured:
             LOGGER.warning("Brave Search is not configured; skipping %s", source_name)
@@ -107,6 +108,7 @@ class BraveSearchClient:
                     query=effective_query,
                     item=item,
                     is_forum_discussion=is_forum_discussion,
+                    dedupe_strategy=dedupe_strategy,
                 )
                 if candidate:
                     results.append(candidate)
@@ -126,6 +128,7 @@ class BraveSearchClient:
         query: str,
         item: dict[str, Any],
         is_forum_discussion: bool,
+        dedupe_strategy: str,
     ) -> CandidateItem | None:
         url = item.get("url")
         if not url:
@@ -141,10 +144,14 @@ class BraveSearchClient:
             or "",
             500,
         )
+        normalized_url = normalize_url(url)
+        if dedupe_strategy == "url_content":
+            normalized_url = normalize_url_with_content_signature(url, title, snippet)
+
         return CandidateItem(
             source=source_name,
             url=url,
-            normalized_url=normalize_url(url),
+            normalized_url=normalized_url,
             title=title,
             snippet=snippet,
             published_date=first_nonempty([item.get("age"), item.get("page_age")]),
@@ -153,6 +160,7 @@ class BraveSearchClient:
                 "query_group": query_group,
                 "query": query,
                 "is_forum_discussion": is_forum_discussion,
+                "dedupe_strategy": dedupe_strategy,
             },
         )
 

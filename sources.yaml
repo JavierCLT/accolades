@@ -48,3 +48,95 @@ sources:
     country: US
     search_lang: en
     is_forum_discussion: true
+
+  - name: brave_competitor_offers
+    type: brave_search
+    enabled: true
+    query_groups:
+      - competitor_offers
+      - competitor_pricing
+      - competitor_product_features
+    result_limit: 5
+    freshness: pw
+    safesearch: moderate
+    country: US
+    search_lang: en
+    dedupe_strategy: url_content
+
+  - name: brave_cash_yield_market
+    type: brave_search
+    enabled: true
+    query_groups:
+      - competitor_cash_yield
+      - market_rate_context
+    result_limit: 5
+    freshness: pw
+    safesearch: moderate
+    country: US
+    search_lang: en
+    dedupe_strategy: url_content
+
+  - name: brave_app_experience
+    type: brave_search
+    enabled: true
+    query_groups:
+      - mobile_app_experience
+    result_limit: 5
+    freshness: pw
+    safesearch: moderate
+    country: US
+    search_lang: en
+    is_forum_discussion: true
+
+  - name: brave_regulatory_complaints
+    type: brave_search
+    enabled: true
+    query_groups:
+      - regulatory_complaints
+    result_limit: 5
+    freshness: pm
+    safesearch: moderate
+    country: US
+    search_lang: en
+    dedupe_strategy: url_content
+
+  - name: cfpb_merrill_complaints
+    type: cfpb_complaints
+    enabled: true
+    companies:
+      - BANK OF AMERICA
+      - MERRILL LYNCH
+      - MERRILL EDGE
+    search_terms:
+      - Merrill
+      - Merrill brokerage
+      - Merrill investment account
+      - Merrill IRA transfer
+    date_window_days: 30
+    result_limit: 25
+
+  - name: fred_rates
+    type: fred_series
+    enabled: true
+    series:
+      - id: DFF
+        label: Effective Federal Funds Rate
+      - id: SOFR
+        label: Secured Overnight Financing Rate
+      - id: DTB3
+        label: 3-Month Treasury Bill Secondary Market Rate
+      - id: DGS1
+        label: 1-Year Treasury Constant Maturity Rate
+
+  - name: apple_merrill_reviews
+    type: apple_app_store_reviews
+    enabled: true
+    country: us
+    result_limit: 50
+    apps:
+      - id: "420496625"
+        name: Merrill Edge
+      - id: "420490216"
+        name: MyMerrill
+      - id: "1419745724"
+        name: Benefits OnLine

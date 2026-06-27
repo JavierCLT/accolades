@@ -6,7 +6,7 @@ from .models import ClassifiedItem
 
 
 def build_email_digest(items: list[ClassifiedItem], run_date: str) -> tuple[str, str]:
-    subject = f"Merrill Edge Daily Monitor — {len(items)} new items"
+    subject = f"Merrill Edge Daily Monitor - {len(items)} new items"
     ordered = sorted(items, key=lambda item: item.relevance_score, reverse=True)
 
     lines: list[str] = []
@@ -33,21 +33,37 @@ def build_email_digest(items: list[ClassifiedItem], run_date: str) -> tuple[str,
     add_item_section(lines, [item for item in ordered if item.is_accolade])
     lines.append("")
 
-    lines.append("3. Forum themes")
-    forum_items = [item for item in ordered if item.is_forum_discussion]
-    if forum_items:
-        forum_counts = Counter(item.category for item in forum_items)
-        lines.append("Theme mix: " + format_counts(forum_counts))
-    add_item_section(lines, forum_items)
+    lines.append("3. Forum / customer / market themes")
+    theme_categories = {
+        "Competitor offer / promotion",
+        "Competitor pricing / fees",
+        "Cash yield / rate change",
+        "Mobile app review",
+        "Regulatory / complaint signal",
+        "Competitive product gap",
+    }
+    theme_items = [item for item in ordered if item.is_forum_discussion or item.category in theme_categories]
+    if theme_items:
+        theme_counts = Counter(item.category for item in theme_items)
+        lines.append("Theme mix: " + format_counts(theme_counts))
+    add_item_section(lines, theme_items)
     lines.append("")
 
     lines.append("4. Negative or high-risk mentions")
     risky_items = [
         item
         for item in ordered
-        if item.sentiment in {"negative", "mixed"}
-        or item.relevance_label == "high"
-        or item.action_recommendation in {"escalate to product", "escalate to service", "competitive threat"}
+        if (
+            item.sentiment in {"negative", "mixed"}
+            or item.relevance_label == "high"
+            or item.action_recommendation in {
+                "escalate to product",
+                "escalate to service",
+                "escalate to compliance",
+                "escalate app issue",
+                "competitive threat",
+            }
+        )
     ]
     add_item_section(lines, risky_items)
     lines.append("")

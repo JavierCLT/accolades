@@ -45,6 +45,7 @@ jobs:
           SEND_EMPTY_DIGEST: "false"
           MAX_ITEMS_PER_DIGEST: "30"
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}

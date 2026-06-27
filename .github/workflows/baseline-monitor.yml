@@ -41,6 +41,7 @@ jobs:
           LOG_LEVEL: INFO
           LOCAL_TIMEZONE: America/New_York
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           LLM_CLASSIFIER_ENABLED: ${{ secrets.LLM_CLASSIFIER_ENABLED }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}

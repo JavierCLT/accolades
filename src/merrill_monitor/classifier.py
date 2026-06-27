@@ -124,7 +124,9 @@ class ItemClassifier:
 
     def _classify_with_rules(self, candidate: CandidateItem) -> Classification:
         text = compact_whitespace(f"{candidate.title} {candidate.snippet}").lower()
+        source_kind = str(candidate.metadata.get("source_kind", "")).strip().lower()
         category = "Other"
+        sentiment = infer_sentiment(text)
 
         accolade_terms = [
             "award",
@@ -166,9 +168,63 @@ class ItemClassifier:
             "locked",
             "error",
         ]
+        competitor_offer_terms = [
+            "bonus",
+            "promotion",
+            "promo",
+            "cash bonus",
+            "transfer bonus",
+            "new account offer",
+            "deposit bonus",
+            "limited time offer",
+            "cash reward",
+        ]
+        regulatory_terms = [
+            "cfpb",
+            "finra",
+            "sec",
+            "regulatory",
+            "lawsuit",
+            "enforcement",
+            "settlement",
+            "fine",
+            "consent order",
+            "class action",
+        ]
+        cash_rate_terms = [
+            "money market",
+            "cash sweep",
+            "cash yield",
+            "settlement fund",
+            "sweep rate",
+            "apy",
+            "interest rate",
+            "brokered cd",
+            "treasury yield",
+        ]
 
-        if contains_any(text, accolade_terms):
+        if source_kind == "apple_app_store_reviews":
+            category = "Mobile app review"
+            sentiment = infer_app_review_sentiment(candidate.metadata.get("rating")) or sentiment
+        elif source_kind == "cfpb_complaints":
+            category = "Regulatory / complaint signal"
+            sentiment = "negative"
+        elif source_kind == "fred_series":
+            category = "Cash yield / rate change"
+            sentiment = "neutral"
+        elif contains_any(text, accolade_terms):
             category = "New accolade / award"
+        elif contains_any(text, regulatory_terms):
+            category = "Regulatory / complaint signal"
+        elif contains_any(text, competitor_offer_terms):
+            category = "Competitor offer / promotion"
+        elif contains_any(text, cash_rate_terms) and (
+            contains_any(text, competitor_terms)
+            or contains_any(text, ["best brokerage", "brokerage cash sweep", "treasury yield", "federal funds"])
+        ):
+            category = "Cash yield / rate change"
+        elif contains_any(text, ["margin rate", "margin rates", "advisory fee", "contract fee"]) and contains_any(text, competitor_terms):
+            category = "Competitor pricing / fees"
         elif contains_any(text, competitor_terms):
             category = "Competitor comparison"
         elif contains_any(text, ["money market", "cash sweep", "cash yield", "settlement fund", "sweep rate", "yield"]):
@@ -186,7 +242,6 @@ class ItemClassifier:
         elif contains_any(text, complaint_terms):
             category = "Customer complaint"
 
-        sentiment = infer_sentiment(text)
         is_forum_discussion = bool(candidate.metadata.get("is_forum_discussion"))
         is_accolade = category == "New accolade / award"
         relevance_score = score_relevance(
@@ -316,6 +371,18 @@ def infer_sentiment(text: str) -> str:
     return "neutral"
 
 
+def infer_app_review_sentiment(rating: object) -> str | None:
+    try:
+        numeric_rating = float(str(rating).strip())
+    except (TypeError, ValueError):
+        return None
+    if numeric_rating <= 2:
+        return "negative"
+    if numeric_rating == 3:
+        return "mixed"
+    return "positive"
+
+
 def score_relevance(
     *,
     text: str,
@@ -333,6 +400,10 @@ def score_relevance(
         score += 15
     if is_accolade:
         score += 25
+    if category in {"Regulatory / complaint signal", "Competitor offer / promotion"}:
+        score += 25
+    if category in {"Cash yield / rate change", "Competitor pricing / fees", "Mobile app review", "Competitive product gap"}:
+        score += 15
     if is_forum_discussion:
         score += 10
     if sentiment in {"negative", "mixed"}:
@@ -351,6 +422,20 @@ def recommend_action(
 ) -> str:
     if is_accolade:
         return "add to accolades tracker"
+    if category == "Regulatory / complaint signal":
+        return "escalate to compliance"
+    if category == "Competitor offer / promotion":
+        if relevance_score >= 75:
+            return "competitive threat"
+        return "review competitor offer"
+    if category in {"Cash yield / rate change", "Money market / cash yield discussion"}:
+        if sentiment in {"negative", "mixed"} and relevance_score >= 60:
+            return "escalate to product"
+        return "review cash yield positioning"
+    if category == "Mobile app review" and sentiment in {"negative", "mixed"}:
+        return "escalate app issue"
+    if category in {"Competitor pricing / fees", "Competitive product gap"} and relevance_score >= 60:
+        return "competitive threat"
     if category == "Competitor comparison" and relevance_score >= 60:
         return "competitive threat"
     if sentiment in {"negative", "mixed"}:

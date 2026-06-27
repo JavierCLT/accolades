@@ -60,3 +60,63 @@ query_groups:
     - '"Merrill Edge" brokerage'
     - '"Merrill Edge" IRA'
     - '"Merrill Edge" taxable account'
+
+  competitor_offers:
+    - '"Fidelity" brokerage bonus'
+    - '"Fidelity" account transfer bonus'
+    - '"Charles Schwab" brokerage bonus'
+    - '"Schwab" transfer bonus'
+    - '"E*TRADE" brokerage promotion'
+    - '"Robinhood" transfer bonus'
+    - '"Webull" IRA bonus'
+    - '"Interactive Brokers" promotion'
+    - '"Vanguard" brokerage bonus'
+    - '"SoFi Invest" brokerage bonus'
+
+  competitor_pricing:
+    - '"Fidelity" margin rates'
+    - '"Charles Schwab" margin rates'
+    - '"E*TRADE" margin rates'
+    - '"Robinhood" margin rates'
+    - '"Interactive Brokers" margin rates'
+    - '"Fidelity" brokerage fees'
+    - '"Schwab" brokerage fees'
+
+  competitor_cash_yield:
+    - '"Fidelity" cash sweep yield'
+    - '"Schwab" cash sweep yield'
+    - '"Vanguard" settlement fund yield'
+    - '"E*TRADE" cash sweep rate'
+    - '"Robinhood" brokerage cash yield'
+    - '"Interactive Brokers" idle cash yield'
+
+  market_rate_context:
+    - 'brokerage cash sweep yield comparison'
+    - 'best brokerage cash sweep rates'
+    - 'money market fund yields brokerage accounts'
+
+  mobile_app_experience:
+    - '"Merrill Edge" app review'
+    - '"Merrill Edge" App Store review'
+    - '"Merrill Edge" mobile app problem'
+    - '"Merrill Edge" app login'
+    - '"Fidelity" app outage brokerage'
+    - '"Schwab" app review brokerage'
+    - '"Robinhood" app outage'
+
+  regulatory_complaints:
+    - '"Merrill Edge" CFPB complaint'
+    - '"Merrill Lynch" CFPB complaint'
+    - '"Merrill Edge" FINRA'
+    - '"Merrill Lynch" FINRA settlement'
+    - '"Merrill Edge" lawsuit'
+    - '"Bank of America" Merrill brokerage complaint'
+    - '"Fidelity" CFPB complaint brokerage'
+    - '"Schwab" FINRA settlement brokerage'
+
+  competitor_product_features:
+    - '"Fidelity" fractional shares'
+    - '"Schwab" fractional shares'
+    - '"Robinhood" retirement match'
+    - '"Fidelity" research tools brokerage'
+    - '"Schwab" thinkorswim mobile brokerage'

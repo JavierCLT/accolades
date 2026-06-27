@@ -45,6 +45,20 @@ def normalize_url(url: str) -> str:
     return urlunsplit((scheme, netloc, path, query, ""))
 
 
+def normalize_url_with_content_signature(url: str, *values: str | None) -> str:
+    normalized = normalize_url(url)
+    signature_seed = compact_whitespace(" ".join(value or "" for value in values))
+    if not normalized or not signature_seed:
+        return normalized
+
+    signature = hashlib.sha256(signature_seed.encode("utf-8")).hexdigest()[:16]
+    parts = urlsplit(normalized)
+    query_pairs = parse_qsl(parts.query, keep_blank_values=False)
+    query_pairs.append(("monitor_sig", signature))
+    query = urlencode(sorted(query_pairs), doseq=True)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
+
+
 def stable_id(source: str, normalized_url: str, title: str = "") -> str:
     seed = f"{source}|{normalized_url or title}".encode("utf-8")
     return hashlib.sha256(seed).hexdigest()[:32]

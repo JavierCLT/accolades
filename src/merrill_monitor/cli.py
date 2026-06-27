@@ -8,7 +8,10 @@ from .classifier import ItemClassifier
 from .config import enabled_sources, iter_source_queries, load_runtime_config, load_yaml_file
 from .digest import build_email_digest
 from .emailer import send_email
+from .app_store import AppStoreReviewsClient
 from .brave_search import BraveSearchClient
+from .cfpb import CFPBComplaintsClient
+from .fred import FredClient
 from .logging_config import configure_logging
 from .models import CandidateItem, ClassifiedItem
 from .storage import SeenStore
@@ -131,18 +134,22 @@ def collect_candidates(
     queries_config: dict,
 ) -> list[CandidateItem]:
     brave_client = BraveSearchClient()
+    app_store_client = AppStoreReviewsClient()
+    cfpb_client = CFPBComplaintsClient()
+    fred_client = FredClient()
     candidates: list[CandidateItem] = []
 
     for source in sources:
         source_type = str(source.get("type", "")).strip().lower()
         source_name = str(source.get("name", source_type)).strip()
-        query_pairs = iter_source_queries(source, queries_config)
-        LOGGER.info("Running source=%s type=%s with %d queries", source_name, source_type, len(query_pairs))
 
         if source_type == "brave_search":
+            query_pairs = iter_source_queries(source, queries_config)
+            LOGGER.info("Running source=%s type=%s with %d queries", source_name, source_type, len(query_pairs))
             if not brave_client.is_configured:
                 LOGGER.warning("Brave Search is not configured; skipping source=%s", source_name)
                 continue
+            dedupe_strategy = str(source.get("dedupe_strategy", "url")).strip().lower() or "url"
             for query_group, query in query_pairs:
                 candidates.extend(
                     brave_client.search(
@@ -156,6 +163,54 @@ def collect_candidates(
                         search_lang=source.get("search_lang", "en"),
                         site_restrict=source.get("site_restrict"),
                         is_forum_discussion=coerce_bool(source.get("is_forum_discussion"), default=False),
+                        dedupe_strategy=dedupe_strategy,
+                    )
+                )
+        elif source_type == "cfpb_complaints":
+            LOGGER.info("Running source=%s type=%s", source_name, source_type)
+            candidates.extend(
+                cfpb_client.search_complaints(
+                    source_name=source_name,
+                    companies=as_string_list(source.get("companies")),
+                    search_terms=as_string_list(source.get("search_terms")),
+                    date_window_days=int(source.get("date_window_days", 30)),
+                    result_limit=int(source.get("result_limit", 25)),
+                )
+            )
+        elif source_type == "fred_series":
+            series = source.get("series") or []
+            if not isinstance(series, list):
+                LOGGER.warning("FRED source=%s has invalid series config; skipping", source_name)
+                continue
+            LOGGER.info("Running source=%s type=%s with %d series", source_name, source_type, len(series))
+            candidates.extend(
+                fred_client.latest_observations(
+                    source_name=source_name,
+                    series=series,
+                )
+            )
+        elif source_type == "apple_app_store_reviews":
+            apps = source.get("apps") or []
+            if not isinstance(apps, list):
+                LOGGER.warning("App Store source=%s has invalid apps config; skipping", source_name)
+                continue
+            LOGGER.info("Running source=%s type=%s with %d apps", source_name, source_type, len(apps))
+            country = str(source.get("country", "us")).strip().lower() or "us"
+            result_limit = int(source.get("result_limit", 50))
+            for app in apps:
+                if not isinstance(app, dict):
+                    continue
+                app_id = str(app.get("id", "")).strip()
+                if not app_id:
+                    continue
+                app_name = str(app.get("name") or app_id).strip()
+                candidates.extend(
+                    app_store_client.fetch_reviews(
+                        source_name=source_name,
+                        app_id=app_id,
+                        app_name=app_name,
+                        country=country,
+                        result_limit=result_limit,
                     )
                 )
         else:
@@ -173,3 +228,13 @@ def dedupe_candidates(candidates: list[CandidateItem]) -> list[CandidateItem]:
         seen.add(key)
         deduped.append(candidate)
     return deduped
+
+
+def as_string_list(value: object) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
