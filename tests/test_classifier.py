@@ -40,6 +40,18 @@ def test_rule_classifier_flags_accolades() -> None:
     assert item.relevance_label == "high"
 
 
+def test_rule_classifier_does_not_flag_competitor_only_award_as_accolade() -> None:
+    item = ItemClassifier(use_llm=False).classify(
+        make_candidate(
+            "Fidelity ranked best online broker",
+            "A new ranking names Fidelity among the top brokerages.",
+        )
+    )
+    assert item.category != "New accolade / award"
+    assert item.is_accolade is False
+    assert item.action_recommendation != "add to accolades tracker"
+
+
 def test_rule_classifier_flags_cash_yield_discussion() -> None:
     item = ItemClassifier(use_llm=False).classify(
         make_candidate(

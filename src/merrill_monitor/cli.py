@@ -11,6 +11,7 @@ from .emailer import send_email
 from .app_store import AppStoreReviewsClient
 from .brave_search import BraveSearchClient
 from .cfpb import CFPBComplaintsClient
+from .filters import is_merrill_related_candidate
 from .fred import FredClient
 from .logging_config import configure_logging
 from .models import CandidateItem, ClassifiedItem
@@ -73,12 +74,13 @@ def run_monitor(args: argparse.Namespace, runtime) -> int:
     candidates = collect_candidates(sources, queries_config)
     deduped_candidates = dedupe_candidates(candidates)
     LOGGER.info("Collected %d candidates, %d after in-batch dedupe", len(candidates), len(deduped_candidates))
+    eligible_candidates = filter_merrill_related_candidates(deduped_candidates)
 
     new_items: list[ClassifiedItem] = []
     seen_count = 0
     dry_run = getattr(args, "dry_run", False)
     baseline = getattr(args, "baseline", False)
-    for candidate in deduped_candidates:
+    for candidate in eligible_candidates:
         if store.get_by_normalized_url(candidate.normalized_url):
             seen_count += 1
             if not dry_run:
@@ -228,6 +230,18 @@ def dedupe_candidates(candidates: list[CandidateItem]) -> list[CandidateItem]:
         seen.add(key)
         deduped.append(candidate)
     return deduped
+
+
+def filter_merrill_related_candidates(candidates: list[CandidateItem]) -> list[CandidateItem]:
+    eligible = [candidate for candidate in candidates if is_merrill_related_candidate(candidate)]
+    skipped_count = len(candidates) - len(eligible)
+    if skipped_count:
+        LOGGER.info(
+            "Retained %d Merrill-related candidates; skipped %d unrelated candidates",
+            len(eligible),
+            skipped_count,
+        )
+    return eligible
 
 
 def as_string_list(value: object) -> list[str]:

@@ -5,6 +5,7 @@ Python 3.11+ monitoring agent for Merrill Edge accolades, rankings, reviews, cus
 ## What It Does
 
 - Searches configurable web, forum, app-review, complaint, and rate-context sources daily.
+- Filters candidates before storage so only Merrill-related items can be stored, classified, or emailed.
 - Deduplicates results by normalized URL against `seen_results` in SQLite.
 - Classifies new items into accolade, competitor, offer/promotion, pricing, complaint, feature, cash yield, ACAT, fees, app/website, service, regulatory, mobile-app, or other categories.
 - Uses optional LLM classification when configured, with a rule-based fallback.
@@ -16,9 +17,9 @@ Python 3.11+ monitoring agent for Merrill Edge accolades, rankings, reviews, cus
 The default configuration includes these monitors:
 
 - Merrill Edge mentions, accolades, rankings, reviews, and forum themes through Brave Search API.
-- Competitor offer and product intelligence through Brave Search API, including promotions, transfer bonuses, pricing, margin rates, and feature gaps.
-- Cash yield and money market intelligence through Brave Search API plus optional FRED rate observations.
-- App experience monitoring through Apple customer review feeds and Brave Search app-experience queries.
+- Competitor offer and product intelligence through Merrill-relative Brave Search queries, including promotions, transfer bonuses, pricing, margin rates, and feature gaps.
+- Cash yield and money market intelligence through Merrill-relative Brave Search queries.
+- Merrill Edge app experience monitoring through Apple customer review feeds and Brave Search app-experience queries.
 - Regulatory and complaint early-warning through the CFPB Consumer Complaint Database API and Brave regulatory searches.
 
 ## Quick Start
@@ -52,9 +53,13 @@ BRAVE_SEARCH_API_KEY=...
 
 The monitor calls Brave's Web Search API endpoint only. It does not scrape result pages.
 
+## Inbox Filtering
+
+The monitor stores and emails only candidates that are related to Merrill. For web/API results, the title, snippet, URL, or metadata must mention Merrill, Merrill Edge, or Merrill Lynch. For Apple reviews, the default configuration includes only the Merrill Edge app ID.
+
 ### Optional FRED API
 
-The `fred_series` source provides interest-rate context for cash sweep and money market positioning. Create a FRED API key from the Federal Reserve Bank of St. Louis and set:
+The `fred_series` source can provide broad interest-rate context for cash sweep and money market positioning. It is disabled by default because the inbox filter is intentionally Merrill-only. If you want to re-enable broad rate context later, create a FRED API key from the Federal Reserve Bank of St. Louis and set:
 
 ```text
 FRED_API_KEY=...

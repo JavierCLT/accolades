@@ -14,6 +14,7 @@ from .models import (
     CandidateItem,
     ClassifiedItem,
 )
+from .filters import is_merrill_related_candidate
 from .utils import compact_whitespace, stable_id, two_sentence_summary
 
 
@@ -125,6 +126,7 @@ class ItemClassifier:
     def _classify_with_rules(self, candidate: CandidateItem) -> Classification:
         text = compact_whitespace(f"{candidate.title} {candidate.snippet}").lower()
         source_kind = str(candidate.metadata.get("source_kind", "")).strip().lower()
+        is_merrill_related = is_merrill_related_candidate(candidate)
         category = "Other"
         sentiment = infer_sentiment(text)
 
@@ -212,7 +214,7 @@ class ItemClassifier:
         elif source_kind == "fred_series":
             category = "Cash yield / rate change"
             sentiment = "neutral"
-        elif contains_any(text, accolade_terms):
+        elif is_merrill_related and contains_any(text, accolade_terms):
             category = "New accolade / award"
         elif contains_any(text, regulatory_terms):
             category = "Regulatory / complaint signal"
@@ -272,25 +274,31 @@ class ItemClassifier:
         category = payload.get("category")
         if category not in ALLOWED_CATEGORIES:
             category = "Other"
+        if category == "New accolade / award" and not is_merrill_related_candidate(candidate):
+            category = "Other"
 
         sentiment = str(payload.get("sentiment", "neutral")).lower()
         if sentiment not in ALLOWED_SENTIMENTS:
             sentiment = "neutral"
-
-        action = str(payload.get("action_recommendation", "monitor")).lower()
-        if action not in ALLOWED_ACTIONS:
-            action = recommend_action(
-                category=category,
-                sentiment=sentiment,
-                relevance_score=int(payload.get("relevance_score", 50) or 50),
-                is_accolade=bool(payload.get("is_accolade")),
-            )
 
         try:
             relevance_score = int(payload.get("relevance_score", 50))
         except (TypeError, ValueError):
             relevance_score = 50
         relevance_score = max(0, min(100, relevance_score))
+
+        is_accolade = (
+            bool(payload.get("is_accolade")) or category == "New accolade / award"
+        ) and is_merrill_related_candidate(candidate)
+
+        action = str(payload.get("action_recommendation", "monitor")).lower()
+        if action not in ALLOWED_ACTIONS or (action == "add to accolades tracker" and not is_accolade):
+            action = recommend_action(
+                category=category,
+                sentiment=sentiment,
+                relevance_score=relevance_score,
+                is_accolade=is_accolade,
+            )
 
         summary = compact_whitespace(str(payload.get("summary", "")))
         if not summary:
@@ -303,7 +311,7 @@ class ItemClassifier:
             category=category,
             sentiment=sentiment,
             relevance_score=relevance_score,
-            is_accolade=bool(payload.get("is_accolade")) or category == "New accolade / award",
+            is_accolade=is_accolade,
             is_forum_discussion=bool(payload.get("is_forum_discussion")) or bool(candidate.metadata.get("is_forum_discussion")),
             action_recommendation=action,
             raw_json={**payload, "classifier": "llm"},

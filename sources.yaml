@@ -61,7 +61,6 @@ sources:
     safesearch: moderate
     country: US
     search_lang: en
-    dedupe_strategy: url_content
 
   - name: brave_cash_yield_market
     type: brave_search
@@ -74,7 +73,6 @@ sources:
     safesearch: moderate
     country: US
     search_lang: en
-    dedupe_strategy: url_content
 
   - name: brave_app_experience
     type: brave_search
@@ -98,7 +96,6 @@ sources:
     safesearch: moderate
     country: US
     search_lang: en
-    dedupe_strategy: url_content
 
   - name: cfpb_merrill_complaints
     type: cfpb_complaints
@@ -117,7 +114,7 @@ sources:
 
   - name: fred_rates
     type: fred_series
-    enabled: true
+    enabled: false
     series:
       - id: DFF
         label: Effective Federal Funds Rate
@@ -136,7 +133,3 @@ sources:
     apps:
       - id: "420496625"
         name: Merrill Edge
-      - id: "420490216"
-        name: MyMerrill
-      - id: "1419745724"
-        name: Benefits OnLine
